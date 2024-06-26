@@ -1,0 +1,61 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-22.04
+    outputs:
+      sha_short: ${{ steps.set_env.outputs.sha_short }} # Define the output for this job
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set Env
+        id: set_env # Add an ID to reference this step's outputs
+        run: |
+          echo "sha_short=$(git rev-parse --short "$GITHUB_SHA")" >> $GITHUB_ENV
+          echo "::set-output name=sha_short::$(git rev-parse --short "$GITHUB_SHA")"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASS }}" | docker login -u "${{ secrets.DOCKER_USER }}" --password-stdin
+
+      - name: Build and Push Docker Image
+        id: set-version
+        run: |
+          SHA=${{ env.sha_short }}
+          echo "version=${SHA}" >> $GITHUB_ENV
+          docker build ./ -f Dockerfile -t ${{ secrets.DOCKER_USER }}/weather-app:$SHA
+          docker push ${{ secrets.DOCKER_USER }}/weather-app:$SHA
+      
+  # modify-manifest:
+  #   needs: build-and-push
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       name: update manifest repo
+  #       with:
+  #         repository: 'ngnrng/NWS-weather-app-manifest'
+  #         token: ${{ secrets.GIT_TOKEN }}
+
+  #     - name: Update yaml files
+  #       run: |
+  #         set -x
+  #         owner="OWNER_not-ngnrng"
+  #         branch="main"
+  #         git config --global user.email ${{ secrets.GIT_EMAIL }}
+  #         git config --global user.name "domger-ops"
+  #         git checkout $branch
+  #         echo ${{ needs.build-and-push.outputs.sha_short }}
+  #         cat cronjob.yaml
+  #         echo "Modifying cronjob.yaml"
+  #         sed -i "s|image: ${{ secrets.DOCKER_USER }}/weather-app:.*|image: ${{ secrets.DOCKER_USER }}/weather-app:${{ needs.build-and-push.outputs.sha_short }}|g" cronjob.yaml
+  #         git add .
+  #         git commit -m "image ${{ needs.build-and-push.outputs.sha_short }}"
+  #         git push
