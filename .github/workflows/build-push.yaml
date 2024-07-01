@@ -34,28 +34,28 @@ jobs:
           docker build ./ -f Dockerfile -t ${{ secrets.DOCKER_USER }}/weather-app:$SHA
           docker push ${{ secrets.DOCKER_USER }}/weather-app:$SHA
       
-modify-manifest:
-  needs: build-and-push
-  runs-on: ubuntu-22.04
-  steps:
-    - uses: actions/checkout@v3
-      name: update manifest repo
-      with:
-        repository: 'domger-ops/weather-argo-manifest'
-        token: ${{ secrets.GIT_TOKEN }}
+  modify-manifest:
+    needs: build-and-push
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+        name: update manifest repo
+        with:
+          repository: 'domger-ops/weather-argo-manifest'
+          token: ${{ secrets.GIT_TOKEN }}
 
-    - name: Update yaml files
-      run: |
-          set -x
-          owner="domger-ops"
-          branch="main"
-          git config --global user.email ${{ secrets.GIT_EMAIL }}
-          git config --global user.name ${{ secrets.GIT_USERNAME }}
-          git checkout $branch
-          echo ${{ needs.build-and-push.outputs.sha_short }}
-          cat cronjob.yaml
-          echo "Modifying cronjob.yaml"
-          sed -i "s|image: ${{ secrets.DOCKER_USER }}/weather-app:.*|image: ${{ secrets.DOCKER_USER }}/weather-app:${{ needs.build-and-push.outputs.sha_short }}|g" cronjob.yaml
-          git add .
-          git commit -m "Update image to  ${{ needs.build-and-push.outputs.sha_short }}"
-          git push
+      - name: Update yaml files
+        run: |
+            set -x
+            owner="domger-ops"
+            branch="main"
+            git config --global user.email ${{ secrets.GIT_EMAIL }}
+            git config --global user.name ${{ secrets.GIT_USERNAME }}
+            git checkout $branch
+            echo ${{ needs.build-and-push.outputs.sha_short }}
+            cat cronjob.yaml
+            echo "Modifying cronjob.yaml"
+            sed -i "s|image: ${{ secrets.DOCKER_USER }}/weather-app:.*|image: ${{ secrets.DOCKER_USER }}/weather-app:${{ needs.build-and-push.outputs.sha_short }}|g" cronjob.yaml
+            git add .
+            git commit -m "Update image to  ${{ needs.build-and-push.outputs.sha_short }}"
+            git push
