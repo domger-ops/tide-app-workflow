@@ -76,4 +76,5 @@ The script checks for errors at each step of the data fetching process:
 - **Extended Forecast**: Fetch and display a more detailed forecast, including chances of precipitation, humidity, etc.
 - **Error Handling Enhancements**: Implement more robust error handling, including retries for network requests and user-friendly error messages.
 - **Performance Optimization**: Optimize the script for faster execution, possibly by parallelizing the data fetching for different locations.
+- **Concept Pivot**: One API pulling tide info for various tidepool locations, delivering the lowest tide number as a value and each low point's time for each day as another. Another API will pulls the estimated temp and wind speed and short forecast description for that time of day, combining the info to let the the user know how to plan the perfect day at the tide pool. We can even grade the low tide based on certain weighted criteria attached to values.
 ```
