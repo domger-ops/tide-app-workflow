@@ -31,8 +31,8 @@ jobs:
         run: |
           SHA=${{ env.sha_short }}
           echo "version=${SHA}" >> $GITHUB_ENV
-          docker build ./ -f Dockerfile -t ${{ secrets.DOCKER_USER }}/weather-app:$SHA
-          docker push ${{ secrets.DOCKER_USER }}/weather-app:$SHA
+          docker build ./ -f Dockerfile -t ${{ secrets.DOCKER_USER }}/tide-app:$SHA
+          docker push ${{ secrets.DOCKER_USER }}/tide-app:$SHA
       
   modify-manifest:
     needs: build-and-push
@@ -41,7 +41,7 @@ jobs:
       - uses: actions/checkout@v3
         name: update manifest repo
         with:
-          repository: 'domger-ops/weather-argo-manifest'
+          repository: 'domger-ops/tide-argo-manifest'
           token: ${{ secrets.GIT_TOKEN }}
 
       - name: Update yaml files
@@ -55,7 +55,7 @@ jobs:
             echo ${{ needs.build-and-push.outputs.sha_short }}
             cat cronjob.yaml
             echo "Modifying cronjob.yaml"
-            sed -i "s|image: ${{ secrets.DOCKER_USER }}/weather-app:.*|image: ${{ secrets.DOCKER_USER }}/weather-app:${{ needs.build-and-push.outputs.sha_short }}|g" cronjob.yaml
+            sed -i "s|image: ${{ secrets.DOCKER_USER }}/tide-app:.*|image: ${{ secrets.DOCKER_USER }}/tide-app:${{ needs.build-and-push.outputs.sha_short }}|g" cronjob.yaml
             git add .
             git commit -m "Update image to  ${{ needs.build-and-push.outputs.sha_short }}"
             git push
