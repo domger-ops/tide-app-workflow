@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Pushgateway URL
+pushgateway_url="http://pushgateway.monitoring.svc.cluster.local:9091/metrics/job/tide_app"
+
 # Function to fetch and display tide and weather details for a given location using the Stormglass API
 fetch_and_display_tide_and_weather() {
   local park_name="$1"
@@ -60,6 +63,16 @@ fetch_and_display_tide_and_weather() {
     echo "Temperature: ${temp}°F"
   fi
   echo
+
+  # Push metrics to Pushgateway
+  echo "Pushing metrics to Pushgateway..."
+  curl -X POST --data-binary @- "${pushgateway_url}" <<EOF
+tide_lowest_value{park_name="$park_name", city="$city", state="$state"} $lowest_tide_value
+tide_lowest_time{park_name="$park_name", city="$city", state="$state"} $lowest_tide_time
+weather_temperature{park_name="$park_name", city="$city", state="$state"} $temp
+EOF
+
+  echo "Metrics pushed successfully."
 }
 
 # Array of locations
