@@ -65,6 +65,18 @@ fetch_weather_data() {
       echo "Temperature at high tide: ${temp_high}°F"
     fi
     echo
+      # Push metrics to Pushgateway
+  echo "Pushing metrics to Pushgateway..."
+  curl -X POST --data-binary @- "${pushgateway_url}" <<EOF
+tide_lowest_value{park_name="$park_name", city="$city", state="$state"} $lowest_tide_value
+tide_lowest_time{park_name="$park_name", city="$city", state="$state"} $lowest_tide_time
+tide_highest_value{park_name="$park_name", city="$city", state="$state"} $highest_tide_value
+tide_highest_time{park_name="$park_name", city="$city", state="$state"} $highest_tide_time
+weather_temperature_low_tide{park_name="$park_name", city="$city", state="$state"} $temp_low
+weather_temperature_high_tide{park_name="$park_name", city="$city", state="$state"} $temp_high
+EOF
+
+  echo "Metrics pushed successfully."
 }
 
 locations=(
