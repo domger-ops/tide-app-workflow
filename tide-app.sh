@@ -76,7 +76,7 @@ weather_temperature_low_tide{park_name="$park_name", city="$city", state="$state
 weather_temperature_high_tide{park_name="$park_name", city="$city", state="$state"} $temp_high
 EOF
 
-  echo "Metrics pushed successfully."
+  echo "Metrics pushed."
 }
 
 locations=(
