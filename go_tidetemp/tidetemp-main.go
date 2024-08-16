@@ -37,42 +37,52 @@ type HourlyWeatherResponse struct {
 	} `json:"properties"`
 }
 
+// Retrieve tide information from an external API for a given station ID.
 func fetchTideAPI(stationID string) (string, error) {
+	// Generate URL
 	today := time.Now().Format("20060102")
 	formattedUrl := fmt.Sprintf(tideUrlTemplate, today, stationID)
-
+	// Make http request
 	resp, err := http.Get(formattedUrl)
+	// Check for an error and return immediately if one exists
 	if err != nil {
 		return "", err
 	}
 	defer resp.Body.Close()
-
+	// Check status code
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("received non-200 status code: %d", resp.StatusCode)
 	}
-
+	// Read body of API response
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", fmt.Errorf("error reading body: %w", err)
 	}
-
+	// Return body as string
 	return string(body), nil
 }
 
+// Parse the tide API response to find the lowest tide value and time.
 func parseTideAPIResponse(tideAPIResponse string) (string, string, error) {
+	// Use the TideResponse struct to unmarshal the JSON response.
 	var response TideResponse
 	err := json.Unmarshal([]byte(tideAPIResponse), &response)
+	// Check for unmarshal error and return immediately if one exists
 	if err != nil {
 		return "", "", fmt.Errorf("error parsing tide API response: %w", err)
 	}
-
+	// Check for valid predictions
 	if len(response.Predictions) == 0 {
 		return "", "", errors.New("no valid tide predictions found")
 	}
-
-	lowestTideValue := float64(999)
+	// Variables to store the lowest tide value and time
+	lowestTideValue := float64(999) // Initialize lowestTideValue with a high starting point to ensure any actual tide value will be lower
 	var lowestTideTime string
-
+	// Iterate over the predictions to find the lowest tide value and time.
+	// Formats the time of the lowest tide into a more readable format ("3:04 PM") and converts the tide
+	// value to a string with three decimal places. If the lowest tide time cannot be parsed
+	// into the expected format, an error is returned. Otherwise, the formatted time and tide value are
+	// returned along with a nil error, indicating successful processing.
 	for _, prediction := range response.Predictions {
 		v, err := strconv.ParseFloat(prediction.V, 64)
 		if err != nil {

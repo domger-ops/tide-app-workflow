@@ -2,7 +2,7 @@
 # Tide App Shell Script
 
 ## How it Works
-The Tide App Shell Script fetches tide and weather data for specified locations using external APIs. It processes this data to determine the times of the lowest and highest tides, along with the corresponding temperatures, and then outputs this information to the user.
+The Tide App Shell Script fetches tide and weather data for specified locations using external APIs. It processes this data to determine the times of the lowest and highest tides, along with the corresponding temperatures, and then outputs this information to the user and/or pushes the values to a monitoring service.
 
 ## Code Structure
 The script is structured into functions that handle specific tasks:
@@ -23,6 +23,7 @@ The script outputs the following information:
 Temperature at the time of the lowest tide.
 Temperature at the time of the highest tide.
 Times for the lowest and highest tides.
+
 Example:
 
 >Fetching tide details for:
